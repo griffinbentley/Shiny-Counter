@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <ctgmath>
 
-
+//Displays instructions on how to operate the program
 void intro()
 {
     std::cout << "WELCOME TO THE SHC!" << std::endl;
@@ -13,6 +13,7 @@ void intro()
                  "name of the pokemon you're hunting." << std::endl;
     std::cout << "To continue a hunt, enter the name of the pokemon that"
                  " you were hunting." << std::endl;
+    std::cout << "To end your current hunt, type end." << std::endl;
     std::cout << "To end the program, type exit at any point." << std::endl;
 }
 
@@ -25,9 +26,7 @@ std::string newFile()
     std::cout << "What pokemon are you hunting? ";
     getline(std::cin, file);
     if(file == "exit")
-    {
         return "exit";
-    }
     file += ".txt";
     myfile.open(file, std::fstream::out);
 
@@ -36,35 +35,27 @@ std::string newFile()
     std::string method;
     std::string shiny_charm;
     while(gen != "2" && gen != "3" && gen != "4" && gen != "5"
-            && gen != "6" && gen != "7")
+          && gen != "6" && gen != "7")
     {
         std::cout << "What generation are you hunting in? ";
         getline(std::cin, gen);
         if(gen == "exit")
-        {
             return "exit";
-        }
         else if(gen == "1")
-        {
             std::cout << "Liar!" << std::endl;
-        }
         else if(gen == "2")
-        {
             while(method != "normal" && method != "breeding")
             {
                 std::cout << "Normal or breeding? ";
                 getline(std::cin, method);
             }
-        }
         else if(gen == "4")
-        {
             while(method != "normal" && method != "masuda" &&
                   method != "poke radar")
             {
                 std::cout << "Normal, masuda, or poke radar? ";
                 getline(std::cin, method);
             }
-        }
         else if(gen == "5")
         {
             while(method != "normal" && method != "masuda")
@@ -72,9 +63,7 @@ std::string newFile()
                 std::cout << "Normal or masuda? ";
                 getline(std::cin, method);
                 if(method == "exit")
-                {
                     return "exit";
-                }
             }
             while(shiny_charm != "y" && shiny_charm != "n")
             {
@@ -92,9 +81,7 @@ std::string newFile()
                              "or hidden pokemon? ";
                 getline(std::cin, method);
                 if(method == "exit")
-                {
                     return "exit";
-                }
             }
             while(shiny_charm != "y" && shiny_charm != "n")
             {
@@ -109,9 +96,7 @@ std::string newFile()
                 std::cout << "Normal or sos battles? ";
                 getline(std::cin, method);
                 if(method == "exit")
-                {
                     return "exit";
-                }
             }
             while(shiny_charm != "y" && shiny_charm != "n")
             {
@@ -120,9 +105,7 @@ std::string newFile()
             }
         }
         if(shiny_charm == "exit" | method == "exit")
-        {
             return "exit";
-        }
     }
 
 
@@ -148,19 +131,36 @@ double calcProb(const std::string& gen, const std::string& method,
     if(method == "normal")
     {
         if(gen == "2" | gen == "3" | gen =="4" | gen == "5")
-        {
             probability = (shiny_charm ? 0.00036621093 : 0.00012207031);
-        }
         else if(gen == "6" | gen == "7")
-        {
             probability = 0.00024414062;
-        }
     }
     else if(method == "breeding")
-    {
         probability = 0.015625;
+    else if(method == "masuda")
+    {
+        if(gen == "4")
+            probability = 0.00061035156;
+        else if(gen == "5")
+            probability = (shiny_charm ? 0.0009765625 : 0.00073242187);
+        else if(gen == "6" || gen =="7")
+            probability = (shiny_charm ? 0.001953125 : 0.00146484375);
     }
-    else if(method == )
+    else if(method == "poke radar")
+        probability = 0.00500488281;
+    else if(method == "friend safari")
+        probability = (shiny_charm ? 0.00170898437 : 0.00122070312);
+    else if(method == "fishing")
+        probability = (shiny_charm ? 0.01049804687 : 0.01000976562 );
+
+    //The probability for hidden pokemon is calculated differently than
+    // the other methods so this probability will be more off than
+    // the others as it has not been implemented correctly yet.
+    else if(method == "hidden")
+        probability = (shiny_charm ? 0.00138828125 : .0009);
+
+    else if(method == "sos battles")
+        probability = (shiny_charm ? 0.00366210937 : 0.00317382812);
     return (count + 1) * probability * pow(1 - probability,
             double(count));
 }
@@ -181,8 +181,10 @@ void closeFile(std::string file, const int& count, const std::string& gen,
 int main()
 {
     intro();
+
     // moves into directory where hunt files are stored
     chdir("Hunts");
+
     // asks user for file to start hunting with
     std::cout << "Select a pokemon to begin with or press "
                  "enter to create a new hunt: ";
@@ -210,6 +212,7 @@ int main()
     }
     else
         file += ".txt";
+    
     //Try to open the given file and if the file doesn't exist,
     // ask for file name again and try again.
     std::fstream myfile;
@@ -228,13 +231,13 @@ int main()
     getline(myfile, method);
     getline(myfile, shiny_charm);
     getline(myfile, start_date);
+
     //turns count from given file into an integer
     int icount = stoi(count);
     bool sc = shiny_charm == "y";
     std::string string;
     std::cout << "Press enter to add a count, exit to quit program, "
                  "or shiny when you get a shiny." << std::endl;
-
 
     // loops and increases count
     // able to end the program entirely by typing "exit"
